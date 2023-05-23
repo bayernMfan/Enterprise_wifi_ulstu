@@ -1,24 +1,14 @@
 package com.example.enterprise_wifi_ulstu
 
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import android.net.wifi.WifiEnterpriseConfig
-import android.net.wifi.WifiManager
-import android.net.wifi.WifiNetworkSpecifier
 import android.net.wifi.WifiNetworkSuggestion
-import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
-import android.os.PatternMatcher
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
 import com.example.enterprise_wifi_ulstu.databinding.FragmentSecondBinding
 import java.security.cert.CertificateFactory
@@ -39,7 +29,7 @@ class SecondFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentSecondBinding.inflate(inflater, container, false)
         return binding.root
@@ -59,16 +49,15 @@ class SecondFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-    @RequiresApi(Build.VERSION_CODES.Q)
-    fun connectToWiFi(pin: String, ssid:String) {
+    private fun connectToWiFi(password: String, ssid:String) {
 
-        //Читаем CaCert из ресурсов
+        //Read CaCert from raw resources
         val certIS = resources.openRawResource(R.raw.wifi_ustu_ca)
         val certFact = CertificateFactory.getInstance("X.509")
         val cert = certFact.generateCertificate(certIS)
         certIS.close()
 
-        //Настраиваем конфиг
+        //Configure enterprise settings
         val enterpriseConfig = WifiEnterpriseConfig()
         enterpriseConfig.eapMethod = WifiEnterpriseConfig.Eap.TTLS
         enterpriseConfig.phase2Method = WifiEnterpriseConfig.Phase2.PAP
@@ -77,7 +66,6 @@ class SecondFragment : Fragment() {
         enterpriseConfig.identity = "i.grushin"
         enterpriseConfig.password = "e0e5eb7c"
 
-        //Настройка предложения улгту
         val ustuCorp = WifiNetworkSuggestion.Builder()
             .setSsid("USTU_CORP")
             .setWpa2EnterpriseConfig(enterpriseConfig)
@@ -85,18 +73,18 @@ class SecondFragment : Fragment() {
 
         val dom = WifiNetworkSuggestion.Builder()
             .setSsid(ssid)
-            .setWpa2Passphrase(pin)
-            .setIsAppInteractionRequired(true)// Optional (Needs location permission)
-            .build();
+            .setWpa2Passphrase(password)
+//            .setIsAppInteractionRequired(true)// Optional (Needs location permission)
+            .build()
 
-        val suggestionsList = listOf(ustuCorp, dom);
+        val suggestionsList = listOf(ustuCorp, dom)
 //        val wifiManager = context?.getSystemService(Context.WIFI_SERVICE) as WifiManager;
 //        val status = wifiManager.addNetworkSuggestions(suggestionsList);
 //        if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
 //            print("PIZDA")
 //        }
 
-        //Единственный на сегодня путь к подключению
+        //The only way to connect directly to specified wifi dated to 23.05.2023
         startActivity(
             Intent(Settings.ACTION_WIFI_ADD_NETWORKS).putParcelableArrayListExtra(
                 Settings.EXTRA_WIFI_NETWORK_LIST,
