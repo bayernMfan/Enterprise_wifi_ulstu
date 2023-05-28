@@ -11,13 +11,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.enterprise_wifi_ulstu.databinding.FragmentSecondBinding
+import com.google.android.material.snackbar.Snackbar
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
 
-/**
- * A simple [Fragment] subclass as the second destination in the navigation.
- */
+
 class SecondFragment : Fragment() {
 
     private var _binding: FragmentSecondBinding? = null
@@ -39,9 +38,24 @@ class SecondFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonSecond.setOnClickListener {
+        binding.connectButton.setOnClickListener {
+            val login = binding.usernameEditText.text.toString()
+            val password = binding.passwordEditText.text.toString()
+//            connectToWiFi(login, password)
+
+
+            if (login.isNullOrEmpty() && password.isNullOrEmpty()) {
+                Snackbar.make(view, "Введите имя пользователя и пароль", Snackbar.LENGTH_LONG)
+                    .show()
+//                Toast.makeText(this@SecondFragment, "hui", Toast.LENGTH_LONG).show()
+            } else {
+                connectToWiFi(login, password)
+            }
+
+//        binding.buttonSecond.setOnClickListener {
 //            findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
-            connectToWiFi("25596205","TP-Link_AF24_5G")
+//            connectToWiFi("25596205","TP-Link_AF24_5G")
+//        }
         }
     }
 
@@ -49,7 +63,7 @@ class SecondFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-    private fun connectToWiFi(password: String, ssid:String) {
+    private fun connectToWiFi(login:String, password: String) {
 
         //Read CaCert from raw resources
         val certIS = resources.openRawResource(R.raw.wifi_ustu_ca)
@@ -63,8 +77,8 @@ class SecondFragment : Fragment() {
         enterpriseConfig.phase2Method = WifiEnterpriseConfig.Phase2.PAP
         enterpriseConfig.domainSuffixMatch = "wifi.ulstu.ru"
         enterpriseConfig.caCertificate = cert  as X509Certificate
-        enterpriseConfig.identity = "i.grushin"
-        enterpriseConfig.password = "e0e5eb7c"
+        enterpriseConfig.identity = login
+        enterpriseConfig.password = password
 
         val ustuCorp = WifiNetworkSuggestion.Builder()
             .setSsid("USTU_CORP")
@@ -72,7 +86,7 @@ class SecondFragment : Fragment() {
             .build()
 
         val dom = WifiNetworkSuggestion.Builder()
-            .setSsid(ssid)
+            .setSsid(login)
             .setWpa2Passphrase(password)
 //            .setIsAppInteractionRequired(true)// Optional (Needs location permission)
             .build()
