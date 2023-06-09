@@ -1,7 +1,9 @@
 package com.example.enterprise_wifi_ulstu
 
+import android.Manifest
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -14,9 +16,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
+    private var ASK_MULTIPLE_PERMISSION_REQUEST_CODE = 123;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
+
+        val permissions = arrayOf<String>(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.CHANGE_WIFI_STATE,
+            Manifest.permission.CHANGE_NETWORK_STATE,
+            Manifest.permission.WRITE_SETTINGS,
+        )
+
+        ActivityCompat.requestPermissions(this,  permissions ,ASK_MULTIPLE_PERMISSION_REQUEST_CODE);
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

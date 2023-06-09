@@ -1,7 +1,9 @@
 package com.example.enterprise_wifi_ulstu
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiEnterpriseConfig
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiNetworkSuggestion
@@ -40,6 +42,8 @@ class SecondFragment : Fragment() {
     @RequiresApi(Build.VERSION_CODES.R)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_SecondFragment_to_ContactsFragment)
@@ -99,23 +103,44 @@ class SecondFragment : Fragment() {
 //            .build()
 
         val suggestionsList = listOf(ustuCorp)
-//        val wifiManager = context?.getSystemService(Context.WIFI_SERVICE) as WifiManager;
-//        val status = wifiManager.addNetworkSuggestions(suggestionsList);
-//        if (status != WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
-//            print("PIZDA")
-//        }
+
 
         val wifiManager = ContextCompat.getSystemService(requireContext(), WifiManager::class.java)
             if (wifiManager!!.isWifiEnabled) {
-                startActivity(
-                    Intent(Settings.ACTION_WIFI_ADD_NETWORKS).putParcelableArrayListExtra(
-                        Settings.EXTRA_WIFI_NETWORK_LIST,
-                        ArrayList<Parcelable?>(suggestionsList)
-                    ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
+                if(Build.VERSION.SDK_INT>Build.VERSION_CODES.R) {
+                    startActivity(
+                        Intent(Settings.ACTION_WIFI_ADD_NETWORKS).putParcelableArrayListExtra(
+                            Settings.EXTRA_WIFI_NETWORK_LIST,
+                            ArrayList<Parcelable?>(suggestionsList)
+                        ).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    )
+                }
+                else {
+                    val wifiManager =
+                        context?.getSystemService(Context.WIFI_SERVICE) as WifiManager
+                    wifiManager.removeNetworkSuggestions(suggestionsList)
+                    val status = wifiManager.addNetworkSuggestions(suggestionsList)
+                    if (status == WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS) {
+                        toast{"WIFI добавлен в список сохраненных сетей"}
+                    }else{
+                        toast { "WIFI сеть не сохранена" }
+                    }
+//                    val config = WifiConfiguration()
+//                    config.SSID="USTU_CORP"
+//                    config.enterpriseConfig=enterpriseConfig
+//                    val networkId = wifiManager.addNetwork(config)
+//
+//                    if(networkId==-1){
+//                        toast { "Failure" }
+//                    }else {
+//                        toast { "Success $networkId" }
+//                    }
+
+
+                }
             }
         else {
-            toast { "idi nahui" }
+            toast { "WIFI не включен" }
         }
 
 
